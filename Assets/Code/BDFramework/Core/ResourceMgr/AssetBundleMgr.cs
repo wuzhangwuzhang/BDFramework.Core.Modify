@@ -228,7 +228,6 @@ namespace BDFramework.ResourceMgr
         public T Load<T>(string path) where T : UnityEngine.Object
         {
             path = "assets/resource/runtime/" + path.ToLower()+".";
-            Debug.LogError("Load Path:"+path);
             //寻找ab的后缀名
             var mainAssetPath = GetExistPath(path);
 
@@ -248,7 +247,7 @@ namespace BDFramework.ResourceMgr
             {
                 //依赖队列需要加上resourcepath
                 var fullPath = this.artRootPath+"/"+ r;
-                Debug.LogError("FullPath:"+fullPath);
+                Debug.Log("FullPath:"+fullPath);
                 loadList.Add(fullPath);
             }
 
@@ -269,7 +268,7 @@ namespace BDFramework.ResourceMgr
 
             //3.加载具体资源
             string finalPath = IPath.Combine(this.artRootPath, mainAssetPath);
-            Debug.LogError("FinalPath:"+finalPath +" mainAssetPath:"+mainAssetPath);
+            Debug.Log("Load Asset,FinalPath:"+finalPath +" mainAssetPath:"+mainAssetPath);
             return LoadFormAssetBundle<T>(finalPath, mainAssetPath);
         }
 

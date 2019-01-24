@@ -11,6 +11,7 @@ using System.IO;
 using BDFramework.Helper;
 using LitJson;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace BDFramework
 {
@@ -32,6 +33,9 @@ namespace BDFramework
         static public Action OnLateUpdate { get; set; }
         static public Action OnGUIAct { get; set; }
 
+        public Slider slider;
+        public Text loadTips;
+        public GameObject panel;
 
         // Use this for initialization
         private void Awake()
@@ -41,7 +45,8 @@ namespace BDFramework
 
         public IEnumerator Start()
         {
-            string localConfigPath = Application.persistentDataPath + "/" + Utils.GetPlatformPath(Application.platform) + "_Server/Windows_VersionConfig.json";
+            string platform = Utils.GetPlatformPath(Application.platform);
+            string localConfigPath = Application.persistentDataPath + "/" + platform + "_Server/"+ platform + "_VersionConfig.json";
             if (File.Exists(localConfigPath))
             {
                 BDebug.Log("Resources already copy to persistantDataPath,return!");
@@ -50,7 +55,7 @@ namespace BDFramework
             else
             {
                 BDebug.Log("First Start,Copy Resources!");
-                StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "_Server/Windows_VersionConfig.json"));
+                StartCoroutine(CopyStreamAsset2PersistantPath(platform + "_Server/"+ platform + "_VersionConfig.json"));
 
                 yield return new WaitForSeconds(0.5f);
                 AssetConfig localconf = null;
@@ -65,11 +70,7 @@ namespace BDFramework
                         {
                             continue;
                         }
-                        if (item.LocalPath == "LocalDB")
-                        {
-                            item.LocalPath = "Local.db";
-                        }
-                        StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/" + item.LocalPath));
+                        StartCoroutine(CopyStreamAsset2PersistantPath(platform + "/" + item.LocalPath));
                     }
                 }
                 else
@@ -78,32 +79,16 @@ namespace BDFramework
                 }
 
             }
-            #region 资源拷贝
-            //yield return new WaitForSeconds(2f);
-            //string artConfig = Application.persistentDataPath + "/" + Utils.GetPlatformPath(Application.platform) + "/Art/Config.json";
-            //if (File.Exists(artConfig))
-            //{
-            //    var content = File.ReadAllText(artConfig);
-            //    var list = JsonMapper.ToObject<List<ManifestItem>>(content);
-            //    foreach (var item in list)
-            //    {
-            //        for (int i = 0; i < item.Dependencies.Count; i++)
-            //        {
-            //            if (item.Dependencies[i] == item.Name)
-            //                continue;
-            //            StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/" + item.Dependencies[i]));
-            //        }
-            //        StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/" + item.Name));
-            //    }
-            //}
-            //else
-            //{
-            //    BDebug.LogError("can't find:"+artConfig);
-
-            //} 
-            #endregion
             yield return null;
-            LaunchLocal();
+
+            BDebug.Log("Check for Update!", "red");
+            //检查更新资源更新
+            StartCoroutine(CheckUpdateResources(()=>{
+
+                //进入游戏
+                BDebug.Log("Enter Game!", "red");
+                LaunchLocal();
+            }));
         }
 
         /// <summary>
@@ -161,7 +146,51 @@ namespace BDFramework
             www.Dispose();
         }
 
-#region 启动非热更逻辑
+
+        int downLoadIndex= 0;
+        int taskCount = 0;
+        /// <summary>
+        /// 检查需要更新的资源
+        /// </summary>
+        private IEnumerator CheckUpdateResources(Action CallBack)
+        {
+          
+            var path = Application.persistentDataPath;
+            var t = VersionContorller.Start("http://192.168.3.203", path,
+                (i, j) =>
+                {
+                    downLoadIndex = i;
+                    taskCount = j;
+                    if (i == j && j == 0)
+                    {
+                        slider.value = 1f;
+                        loadTips.text = string.Format("资源加载完成，游戏初始化中");
+                        BDebug.LogError("no file to download");
+                    }
+                    else if (i == j && j != 0)
+                    {
+                        slider.value = 1f;
+                        panel.SetActive(false);
+                        loadTips.text = string.Format("资源加载完成，游戏初始化中");
+                        BDebug.LogError("download finished");
+                    }
+                    else
+                    {
+                        float progress = (i + 1) * 1f / j;
+                        slider.value =  progress;
+                        loadTips.text = string.Format("资源加载进度：[{0}]",progress.ToString("P"));
+                        Debug.LogFormat("资源更新进度：{0}/{1}", i, j);
+                    }
+                },
+                (error) =>
+                {
+                    Debug.LogError("错误:" + error);
+                }, CallBack );
+            //var result = t.Result;
+            //Debug.Log("下载状态返回:" + result);
+            yield return null;
+        }
+        #region 启动非热更逻辑
 
         /// <summary>
         /// 启动本地代码

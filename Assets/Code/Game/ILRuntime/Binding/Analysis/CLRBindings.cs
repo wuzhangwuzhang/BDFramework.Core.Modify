@@ -115,6 +115,8 @@ namespace ILRuntime.Runtime.Generated
             UnityEngine_Vector3_Binding.Register(app);
             DG_Tweening_TweenSettingsExtensions_Binding.Register(app);
             DataListenerServer_Binding.Register(app);
+            UnityEngine_Rect_Binding.Register(app);
+            UnityEngine_GUI_Binding.Register(app);
 
             ILRuntime.CLR.TypeSystem.CLRType __clrType = null;
         }

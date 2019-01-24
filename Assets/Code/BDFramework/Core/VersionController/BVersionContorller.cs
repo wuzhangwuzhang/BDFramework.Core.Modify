@@ -36,14 +36,14 @@ namespace BDFramework
         /// <param name="onProcess"></param>
         /// <param name="onError"></param>
         /// 返回码: -1：error  0：success
-        static async public Task<int> Start(string serverConfigPath, string localConfigPath, Action<int, int> onProcess,Action<string> onError)
+        static async public Task<int> Start(string serverConfigPath, string localConfigPath, Action<int, int> onProcess,Action<string> onError,Action OnDownloadFinished = null)
         {
 
             IPath.Combine("", "");
             var client = HttpMgr.Inst.GetFreeHttpClient();
             var platform = Utils.GetPlatformPath(Application.platform);
             //开始下载服务器配置
-            var serverPath = serverConfigPath + "/" + platform + "/" + platform + "_VersionConfig.json";
+            var serverPath = serverConfigPath + "/" + platform + "_Server/" + platform + "_VersionConfig.json";
             Debug.Log("server:" + serverPath);
             string serverConfig = "";
             try
@@ -60,12 +60,16 @@ namespace BDFramework
             
             var serverconf = LitJson.JsonMapper.ToObject<AssetConfig>(serverConfig);
             AssetConfig localconf = null;
-            var localPath = localConfigPath + "/" + platform + "/" + platform + "_VersionConfig.json";
+            var localPath = localConfigPath + "/" + platform + "_Server/" + platform + "_VersionConfig.json";
             BDebug.LogError("localPath:"+localPath);
 
             if (File.Exists(localPath))
             {
                 localconf = LitJson.JsonMapper.ToObject<AssetConfig>(File.ReadAllText(localPath));
+            }
+            else
+            {
+                BDebug.LogError("Can't find path："+localPath);
             }
 
             //对比差异列表进行下载
@@ -80,7 +84,7 @@ namespace BDFramework
             foreach (var item in list)
             {
                 count++;
-                var sp = serverConfigPath + "/" + platform + "/" + item.LocalPath;
+                var sp = serverConfigPath + "/" + platform +"_Server/" + item.HashName;
                 var lp = localConfigPath + "/" + platform + "/" + item.LocalPath;
 
                 //创建目录
@@ -111,10 +115,14 @@ namespace BDFramework
             {
                 File.WriteAllText(localPath, serverConfig);
                 BDebug.Log("localPath:" +localPath);
+                if (OnDownloadFinished != null)
+                    OnDownloadFinished();
             }
             else
             {
                 BDebug.Log("可更新数量为0");
+                if (OnDownloadFinished != null)
+                    OnDownloadFinished();
             }
 
             client.Dispose();
@@ -134,18 +142,22 @@ namespace BDFramework
 
             var list = new List<AssetItem>();
             //比对平台
-            if (local.Platfrom == server.Platfrom ) 
+            if (local.Platfrom == server.Platfrom)
             {
                 foreach (var serverAsset in server.Assets)
                 {
                     //比较本地是否有 hash、文件名一致的资源
                     var result = local.Assets.Find((a) => a.HashName == serverAsset.HashName && a.LocalPath == serverAsset.LocalPath);
-                    
+
                     if (result == null)
                     {
                         list.Add(serverAsset);
                     }
                 }
+            }
+            else
+            {
+                BDebug.LogError("Platform not same!");
             }
 
             return list;
