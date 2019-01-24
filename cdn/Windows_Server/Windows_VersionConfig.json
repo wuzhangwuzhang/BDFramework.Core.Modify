@@ -1,0 +1,60 @@
+{
+	"Platfrom": "Windows",
+	"Version": 1.0,
+	"Assets": [{
+		"HashName": "f27db6cf3e9bae4d1cfe2d7093b771ce",
+		"LocalPath": "Local.db"
+	},
+	{
+		"HashName": "53a7f56afa688d7978a060bf191f45e2",
+		"LocalPath": "Art/Art"
+	},
+	{
+		"HashName": "7c9ad37a9279b332bbd769f965233840",
+		"LocalPath": "Art/Config.json"
+	},
+	{
+		"HashName": "d19615ad1b535cac3d2601c8e7905324",
+		"LocalPath": "Art/assets/resource/imge/test/timg (1).jpg"
+	},
+	{
+		"HashName": "e9bd77fc81375f6721a5829061079940",
+		"LocalPath": "Art/assets/resource/runtime/windows/window_demo1.prefab"
+	},
+	{
+		"HashName": "b8b4f8811f6fe3fd8af8f44aae70be0d",
+		"LocalPath": "Art/assets/resource/runtime/windows/window_demo2.prefab"
+	},
+	{
+		"HashName": "6a8cf50b72ced94f3f56863053160607",
+		"LocalPath": "Art/assets/resource/runtime/windows/window_demo3.prefab"
+	},
+	{
+		"HashName": "3182c8e876754ceb14d20b07ec821bc4",
+		"LocalPath": "Art/assets/resource/runtime/windows/window_demo4.prefab"
+	},
+	{
+		"HashName": "85cc03e0d2c9b19334971a5ff61dc8cc",
+		"LocalPath": "Art/assets/resource/runtime/windows/window_demomain.prefab"
+	},
+	{
+		"HashName": "ff1b278cb09f105d9d56601776dc7479",
+		"LocalPath": "Art/assets/resource/runtime/windows/window_messagebox.prefab"
+	},
+	{
+		"HashName": "ef77092fe7fdff934106d48624e70aa1",
+		"LocalPath": "hotfix/base.dll"
+	},
+	{
+		"HashName": "3905d5f34b5fe20748d462a0be130d31",
+		"LocalPath": "hotfix/base.dll.mdb"
+	},
+	{
+		"HashName": "a11b5da9ab96463549aebf641504fb59",
+		"LocalPath": "hotfix/hotfix.dll"
+	},
+	{
+		"HashName": "3554acb536aab0ec3cee72ecaa7fb104",
+		"LocalPath": "hotfix/hotfix.dll.mdb"
+	}]
+}
