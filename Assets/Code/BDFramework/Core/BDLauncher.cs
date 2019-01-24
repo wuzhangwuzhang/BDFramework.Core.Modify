@@ -41,52 +41,68 @@ namespace BDFramework
 
         public IEnumerator Start()
         {
-            StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/Windows_VersionConfig.json")); ;
-            yield return new WaitForSeconds(1f);
-            AssetConfig localconf = null;
-            string localConfigPath = Application.persistentDataPath + "/" + Utils.GetPlatformPath(Application.platform) + "/Windows_VersionConfig.json";
-
+            string localConfigPath = Application.persistentDataPath + "/" + Utils.GetPlatformPath(Application.platform) + "_Server/Windows_VersionConfig.json";
             if (File.Exists(localConfigPath))
             {
-                localconf = LitJson.JsonMapper.ToObject<AssetConfig>(File.ReadAllText(localConfigPath));
-                BDebug.Log("version:" + localconf.Version);
-                foreach (var item in localconf.Assets)
-                {
-                    if (item.LocalPath == "LocalDB")
-                    {
-                        item.LocalPath = "Local.db";
-                    }
-                    StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform)+"/" + item.LocalPath));
-                }
+                BDebug.Log("Resources already copy to persistantDataPath,return!");
+                yield return null;
             }
             else
             {
-                BDebug.Log("not exist path:" + localConfigPath);
-            }
+                BDebug.Log("First Start,Copy Resources!");
+                StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "_Server/Windows_VersionConfig.json"));
 
-            yield return new WaitForSeconds(2f);
-            string artConfig = Application.persistentDataPath + "/" + Utils.GetPlatformPath(Application.platform) + "/Art/Config.json";
-            if (File.Exists(artConfig))
-            {
-                var content = File.ReadAllText(artConfig);
-                var list = JsonMapper.ToObject<List<ManifestItem>>(content);
-                foreach (var item in list)
+                yield return new WaitForSeconds(0.5f);
+                AssetConfig localconf = null;
+
+                if (File.Exists(localConfigPath))
                 {
-                    for (int i = 0; i < item.Dependencies.Count; i++)
+                    localconf = LitJson.JsonMapper.ToObject<AssetConfig>(File.ReadAllText(localConfigPath));
+                    BDebug.Log("version:" + localconf.Version);
+                    foreach (var item in localconf.Assets)
                     {
-                        if (item.Dependencies[i] == item.Name)
+                        if (-1 == item.LocalPath.IndexOf('.'))//非文件不处理
+                        {
                             continue;
-                        StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/Art/" + item.Dependencies[i]));
+                        }
+                        if (item.LocalPath == "LocalDB")
+                        {
+                            item.LocalPath = "Local.db";
+                        }
+                        StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/" + item.LocalPath));
                     }
-                    StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/Art/" + item.Name));
                 }
-            }
-            else
-            {
-                BDebug.LogError("can't find:"+artConfig);
+                else
+                {
+                    BDebug.Log("not exist path:" + localConfigPath);
+                }
 
             }
-            yield return new WaitForSeconds(1f);
+            #region 资源拷贝
+            //yield return new WaitForSeconds(2f);
+            //string artConfig = Application.persistentDataPath + "/" + Utils.GetPlatformPath(Application.platform) + "/Art/Config.json";
+            //if (File.Exists(artConfig))
+            //{
+            //    var content = File.ReadAllText(artConfig);
+            //    var list = JsonMapper.ToObject<List<ManifestItem>>(content);
+            //    foreach (var item in list)
+            //    {
+            //        for (int i = 0; i < item.Dependencies.Count; i++)
+            //        {
+            //            if (item.Dependencies[i] == item.Name)
+            //                continue;
+            //            StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/" + item.Dependencies[i]));
+            //        }
+            //        StartCoroutine(CopyStreamAsset2PersistantPath(Utils.GetPlatformPath(Application.platform) + "/" + item.Name));
+            //    }
+            //}
+            //else
+            //{
+            //    BDebug.LogError("can't find:"+artConfig);
+
+            //} 
+            #endregion
+            yield return null;
             LaunchLocal();
         }
 
@@ -108,7 +124,7 @@ namespace BDFramework
             string targetPath = Application.persistentDataPath+ "/" + absulateFilePath;
 
             string filename = absulateFilePath.Substring(absulateFilePath.LastIndexOf('/')+1);
-            //BDebug.Log("Copy file to persistantPath:"+ srcFilePath, "red");
+            BDebug.Log("Copy file to persistantPath:"+ srcFilePath, "red");
             WWW www = new WWW(srcFilePath);
             yield return www;
             string directory = targetPath.Replace("/" + filename, "");
