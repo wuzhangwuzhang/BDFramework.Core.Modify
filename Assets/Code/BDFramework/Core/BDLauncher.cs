@@ -27,7 +27,9 @@ namespace BDFramework
         public AssetLoadPath CodeRoot = AssetLoadPath.Editor;
         public AssetLoadPath SQLRoot = AssetLoadPath.Editor;
         public AssetLoadPath ArtRoot = AssetLoadPath.Editor;
-        public string FileServerUrl = "192.168.3.203";
+        public string FileServerUrl = "127.0.0.1";
+        public string Port = "80";
+        public string ServerRootName = "ftpserver";
         static public Action OnStart { get; set; }
         static public Action OnUpdate { get; set; }
         static public Action OnLateUpdate { get; set; }
@@ -156,7 +158,12 @@ namespace BDFramework
         {
           
             var path = Application.persistentDataPath;
-            var t = VersionContorller.Start("http://"+ FileServerUrl, path,
+            string server = string.Format("http://{0}:{1}", FileServerUrl, Port);
+            if(!string.IsNullOrEmpty(ServerRootName))
+            {
+                server = string.Format("{0}/{1}", server, ServerRootName);
+            }
+            var t = VersionContorller.Start(server, path,
                 (i, j) =>
                 {
                     downLoadIndex = i;
