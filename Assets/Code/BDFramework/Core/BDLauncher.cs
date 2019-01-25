@@ -164,6 +164,7 @@ namespace BDFramework
                     if (i == j && j == 0)
                     {
                         slider.value = 1f;
+                        panel.SetActive(false);
                         loadTips.text = string.Format("资源加载完成，游戏初始化中");
                         BDebug.LogError("no file to download");
                     }
@@ -172,7 +173,7 @@ namespace BDFramework
                         slider.value = 1f;
                         panel.SetActive(false);
                         loadTips.text = string.Format("资源加载完成，游戏初始化中");
-                        BDebug.LogError("download finished");
+                        BDebug.Log("<color=yellow>Resource download finished</color>");
                     }
                     else
                     {

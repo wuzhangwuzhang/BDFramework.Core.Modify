@@ -59,9 +59,9 @@ namespace BDFramework
 
             
             var serverconf = LitJson.JsonMapper.ToObject<AssetConfig>(serverConfig);
-            AssetConfig localconf = null;
+            AssetConfig localconf = new AssetConfig();
             var localPath = localConfigPath + "/" + platform + "_Server/" + platform + "_VersionConfig.json";
-            BDebug.LogError("localPath:"+localPath);
+            BDebug.Log(string.Format("localConfigPath:{0}", localPath));
 
             if (File.Exists(localPath))
             {
@@ -70,61 +70,73 @@ namespace BDFramework
             else
             {
                 BDebug.LogError("Can't find path："+localPath);
+                localconf.Version = 0;
+                localconf.Platfrom = Utils.GetPlatformPath(Application.platform);
             }
-
-            //对比差异列表进行下载
-            var list = CompareConfig(localConfigPath, localconf, serverconf);
-            if (list.Count > 0)
+            
+            BDebug.Log(string.Format("<color=red>serverconf.Version:{0} localconf.Version:{1} </color>", serverconf.Version, localconf.Version));
+            if (serverconf.Version > localconf.Version)
             {
-                //预通知要进入热更模式
-                onProcess(0, list.Count);
-            }
-
-            int count = 0;
-            foreach (var item in list)
-            {
-                count++;
-                var sp = serverConfigPath + "/" + platform +"_Server/" + item.HashName;
-                var lp = localConfigPath + "/" + platform + "/" + item.LocalPath;
-
-                //创建目录
-                var direct = Path.GetDirectoryName(lp);
-                if (Directory.Exists(direct) == false)
+                //对比差异列表进行下载
+                var list = CompareConfig(localConfigPath, localconf, serverconf);
+                if (list.Count > 0)
                 {
-                    Directory.CreateDirectory(direct);
+                    //预通知要进入热更模式
+                    onProcess(0, list.Count);
                 }
 
-                //下载
-                try
+                int count = 0;
+                foreach (var item in list)
                 {
-                    await client.DownloadFileTaskAsync(sp, lp);
-                }
-                catch (Exception e)
-                {
-                    BDebug.LogError(sp);
-                    onError( e.Message);
-                    return -1;
+                    count++;
+                    var sp = serverConfigPath + "/" + platform + "_Server/" + item.HashName;
+                    var lp = localConfigPath + "/" + platform + "/" + item.LocalPath;
+
+                    //创建目录
+                    var direct = Path.GetDirectoryName(lp);
+                    if (Directory.Exists(direct) == false)
+                    {
+                        Directory.CreateDirectory(direct);
+                    }
+
+                    //下载
+                    try
+                    {
+                        await client.DownloadFileTaskAsync(sp, lp);
+                    }
+                    catch (Exception e)
+                    {
+                        BDebug.LogError(sp);
+                        onError(e.Message);
+                        return -1;
+                    }
+
+                    BDebug.Log(string.Format("<color=yellow>下载成功：{0}</color>", sp));
+                    onProcess(count, list.Count);
                 }
 
-                BDebug.Log("下载成功：" + sp);
-                onProcess(count, list.Count);
-            }
-
-            //写到本地
-            if (list.Count > 0)
-            {
-                File.WriteAllText(localPath, serverConfig);
-                BDebug.Log("localPath:" +localPath);
-                if (OnDownloadFinished != null)
-                    OnDownloadFinished();
+                //写到本地
+                if (list.Count > 0)
+                {
+                    File.WriteAllText(localPath, serverConfig);
+                    BDebug.Log("localPath:" + localPath);
+                    if (OnDownloadFinished != null)
+                        OnDownloadFinished();
+                }
+                else
+                {
+                    BDebug.Log("可更新数量为0");
+                    if (OnDownloadFinished != null)
+                        OnDownloadFinished();
+                }
             }
             else
             {
-                BDebug.Log("可更新数量为0");
+                //版本号相同,不需要对比更新
+                BDebug.Log("Need't update file,Will enter game...");
                 if (OnDownloadFinished != null)
                     OnDownloadFinished();
             }
-
             client.Dispose();
             return 0;
         }
