@@ -521,9 +521,9 @@ MonoBehaviour:
   CodeRoot: 1
   SQLRoot: 1
   ArtRoot: 1
-  FileServerUrl: 192.168.1.92
-  Port: 8080
-  ServerRootName: ftpserver
+  FileServerUrl: staticresource-1251021262.file.myqcloud.com
+  Port: 80
+  ServerRootName: test
   slider: {fileID: 1125245081}
   loadTips: {fileID: 1177128850}
   panel: {fileID: 233862346}
