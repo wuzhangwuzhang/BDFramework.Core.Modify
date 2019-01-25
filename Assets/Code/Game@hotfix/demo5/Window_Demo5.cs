@@ -24,7 +24,7 @@ public class Window_Demo5 : AWindow
         title.text = "New_Title";
         BDebug.LogError("Window_Demo5 初始化");
         btn_ok.onClick.AddListener(()=> {
-            msg.text = "On btn_ok click!";
+            msg.text = "On btn_ok click! iOS更新------";
         });
 
         btn_cancle.onClick.AddListener(() =>
