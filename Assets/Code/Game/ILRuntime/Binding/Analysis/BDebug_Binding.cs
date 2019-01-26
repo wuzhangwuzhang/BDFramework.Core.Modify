@@ -85,9 +85,6 @@ namespace ILRuntime.Runtime.Generated
             System.Object @s = (System.Object)typeof(System.Object).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack));
             __intp.Free(ptr_of_this_method);
 
-
-            global::BDebug.LogError(@s);
-
             return __ret;
         }
 
